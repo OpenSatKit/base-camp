@@ -34,18 +34,23 @@ The python appplication uses [PySimpleGUI](https://pysimplegui.readthedocs.io/en
 ## Clone cFSAT Repository
     git clone https://github.com/OpenSatKit/base-camp.git
 
-# Run the Python Ground System Applcation 
+# Using Base Camp
+
+## Run the Python Ground System Applcation 
 
     cd cfsat/gnd-sys/app
     . ./setvars.sh
     python3 cfsat.py
 
-# Build and Run the cFS   
+## Build and Run the cFS   
 
+[](https://github.com/OpenSatKit/base-camp/blob/main/docs/build-cfs.png)
+
+[](https://github.com/OpenSatKit/base-camp/blob/main/docs/start-cfs.png)
 
 ## Next Steps
-- *Base Camp Quick Start Guide* (coming soon)
 - [OpenSatKit](https://opensatkit.org/) is being updated to serve as the hub to all OpenSatKit resources 
+- *Base Camp Quick Start Guide* (coming soon)
 
 
 
