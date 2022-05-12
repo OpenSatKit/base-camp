@@ -1,0 +1,9 @@
+{
+  "time-stamp": "05/05/2022-06:31:44",
+  "title": "Create Demo App",
+  "objective": [
+    "Transform the Hello World app to the OSK_C_DEMO app ",
+    "through a series of eercises that introduce different ",
+    "cFS and OSK application architectural features."
+  ]
+}
