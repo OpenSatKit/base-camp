@@ -44,9 +44,9 @@ The python appplication uses [PySimpleGUI](https://pysimplegui.readthedocs.io/en
 
 ## Build and Run the cFS   
 
-[](https://github.com/OpenSatKit/base-camp/blob/main/docs/build-cfs.png)
+![](https://github.com/OpenSatKit/base-camp/blob/main/docs/build-cfs.png)
 
-[](https://github.com/OpenSatKit/base-camp/blob/main/docs/start-cfs.png)
+![](https://github.com/OpenSatKit/base-camp/blob/main/docs/start-cfs.png)
 
 ## Next Steps
 - [OpenSatKit](https://opensatkit.org/) is being updated to serve as the hub to all OpenSatKit resources 
