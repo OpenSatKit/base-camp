@@ -40,7 +40,7 @@ The python appplication uses [PySimpleGUI](https://pysimplegui.readthedocs.io/en
 This must be done prior to runing the python ground system because it creates python libraries that define the cFS app interfaces
 
     cd base-camp/cfsat/cfe-eds-framework
-    make SIMULATION=native
+    make SIMULATION=native prep
     make install
 
 ## Run the Python Ground System Applcation 
