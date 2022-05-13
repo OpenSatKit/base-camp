@@ -222,8 +222,8 @@ bool CMDMGR_DispatchFunc(CMDMGR_Class_t* CmdMgr, const CFE_SB_Buffer_t *SbBufPtr
       {
 
          CFE_EVS_SendEvent (CMDMGR_DISPATCH_INVALID_LEN_ERR_EID, CFE_EVS_EventType_ERROR,
-                            "Invalid command user data length %ld, expected %d for function code %d",
-                            UserDataLen, CmdMgr->Cmd[FuncCode].UserDataLen, FuncCode);
+                            "Invalid command user data length %d, expected %d for function code %d",
+                            (unsigned int)UserDataLen, CmdMgr->Cmd[FuncCode].UserDataLen, FuncCode);
 
       }
 
@@ -303,7 +303,7 @@ static void LogMsgBytes(uint8* MsgPtr, size_t PayloadLen, CFE_MSG_FcnCode_t Func
    uint16 HeaderLen = sizeof(CFE_MSG_CommandHeader_t);
    
    
-   OS_printf("Command function %d - %ld byte header: ", FuncCode, sizeof(CFE_MSG_CommandHeader_t));
+   OS_printf("Command function %d - %d byte header: ", FuncCode, (unsigned int)sizeof(CFE_MSG_CommandHeader_t));
    
    for (i=0; i < HeaderLen; i++)
    {

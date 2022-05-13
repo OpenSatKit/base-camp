@@ -48,6 +48,7 @@
 ** {
 **    uint16  MsgId;
 ** } OWNER_XyzCmdMsg_Payload_t;
+**
 ** typedef struct
 ** {
 **    CFE_MSG_CommandHeader_t    CmdHeader;
@@ -74,6 +75,32 @@
 /**********************/
 
 typedef bool (*CMDMGR_CmdFuncPtr_t) (void* ObjDataPtr, const CFE_SB_Buffer_t *SbBufPtr);
+
+/*
+** Ensure alignment in situation when casting from CFE_MSG_CommandHeader_t to
+** CFE_SB_Buffer_t
+*/
+typedef union
+{
+   CFE_MSG_CommandHeader_t  Msg;
+   CFE_SB_Buffer_t          Buf;
+} CMDMGR_AlignedCmdHeader_t;
+
+
+/*
+** Define a generic command without parameters so every app doesn't need to
+** repeat the definition. 
+*/
+
+typedef struct
+{
+
+   CMDMGR_AlignedCmdHeader_t  CmdHeader;
+
+} CMDMGR_NoParamCmdMsg_t;
+#define CMDMGR_NO_PARAM_CMD_DATA_LEN  ((sizeof(CMDMGR_NoParamCmdMsg_t) - sizeof(CFE_MSG_CommandHeader_t)))
+#define CMDMGR_NO_PARAM_CMD_LEN       (sizeof(CMDMGR_NoParamCmdMsg_t))
+
 
 /*
 ** Alternate command counters allow an individual command to have its own 

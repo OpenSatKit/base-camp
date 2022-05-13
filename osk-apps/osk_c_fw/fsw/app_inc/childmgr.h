@@ -48,6 +48,7 @@
 */
 
 #include "osk_c_fw_cfg.h"
+#include "cmdmgr.h"
 
 /***********************/
 /** Macro Definitions **/
@@ -98,12 +99,12 @@ typedef struct
 /*
 ** Command Queue
 */
-
+ 
 typedef struct
 {
 
-   CFE_MSG_CommandHeader_t  CmdHeader;
-   char    Payload[CHILDMGR_CMD_PAYLOAD_LEN];
+   CMDMGR_AlignedCmdHeader_t  CmdHeader;
+   char  Payload[CHILDMGR_CMD_PAYLOAD_LEN];
    
 } CHILDMGR_CmdQEntry_t;
 

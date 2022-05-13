@@ -112,20 +112,6 @@ typedef struct
 } PktUtil_Filter_t;
 
 
-/*
-** Define a generic command without parameters so every app doesn't need to
-** repeat the definition. 
-*/
-
-typedef struct
-{
-
-   CFE_MSG_CommandHeader_t  CmdHeader;
-
-} PKTUTIL_NoParamCmdMsg_t;
-#define PKTUTIL_NO_PARAM_CMD_DATA_LEN  ((sizeof(PKTUTIL_NoParamCmdMsg_t) - sizeof(CFE_MSG_CommandHeader_t)))
-#define PKTUTIL_NO_PARAM_CMD_LEN       (sizeof(PKTUTIL_NoParamCmdMsg_t))
-
 /************************/
 /** Exported Functions **/
 /************************/

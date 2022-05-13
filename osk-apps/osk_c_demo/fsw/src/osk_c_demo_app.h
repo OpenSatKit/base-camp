@@ -128,7 +128,7 @@ typedef struct
    ** Command Packets
    */
 
-   PKTUTIL_NoParamCmdMsg_t MsgLogRunChildFuncCmd;
+   CMDMGR_NoParamCmdMsg_t MsgLogRunChildFuncCmd;
  
    /*
    ** Telemetry Packets

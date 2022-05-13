@@ -252,14 +252,14 @@ static bool LoadJsonData(size_t JsonFileLen, void* UserDataPtr)
    {
       RetStatus = true;
       CFE_EVS_SendEvent(INITBL_LOAD_JSON_EID, CFE_EVS_EventType_INFORMATION, 
-                        "JSON initialization file successfully processed with %ld parameters",
-                        IniTbl->JsonParamCnt);
+                        "JSON initialization file successfully processed with %d parameters",
+                        (unsigned int)IniTbl->JsonParamCnt);
    }
    else
    {
       CFE_EVS_SendEvent(INITBL_LOAD_JSON_ERR_EID, CFE_EVS_EventType_ERROR, 
-                        "Error processing JSON initialization file. %ld of %ld parameters processed",
-                        ObjLoadCnt, IniTbl->JsonParamCnt);  
+                        "Error processing JSON initialization file. %d of %d parameters processed",
+                        (unsigned int)ObjLoadCnt, (unsigned int)IniTbl->JsonParamCnt);  
    }
    
    return RetStatus;

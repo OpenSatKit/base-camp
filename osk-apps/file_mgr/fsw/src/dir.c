@@ -645,7 +645,7 @@ bool SendDirListTlm(const char *DirName, uint16 DirListOffset, bool IncludeSizeT
    char   PathFilename[OS_MAX_PATH_LEN] = "\0";
 
 
-   OS_printf("sizeof(Dir->ListTlm.Payload.FileList) = %ld\n", sizeof(Dir->ListTlm.Payload.FileList));
+   OS_printf("sizeof(Dir->ListTlm.Payload.FileList) = %d\n", (unsigned int)sizeof(Dir->ListTlm.Payload.FileList));
 
    FileInfo = FileUtil_GetFileInfo(DirName, OS_MAX_PATH_LEN, false);
                           
