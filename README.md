@@ -36,15 +36,20 @@ The python appplication uses [PySimpleGUI](https://pysimplegui.readthedocs.io/en
 
 # Using Base Camp
 
+## Build the core Flight System Target
+This must be done prior to runing the python ground system because it creates python libraries that define the cFS app interfaces
+
+    cd base-camp/cfsat/cfe-eds-framework
+    make SIMULATION=native
+    make install
+
 ## Run the Python Ground System Applcation 
 
-    cd cfsat/gnd-sys/app
+    cd ../gnd-sys/app
     . ./setvars.sh
     python3 cfsat.py
 
-## Build and Run the cFS   
-
-![](https://github.com/OpenSatKit/base-camp/blob/main/docs/build-cfs.png)
+## Run the cFS
 
 ![](https://github.com/OpenSatKit/base-camp/blob/main/docs/start-cfs.png)
 
