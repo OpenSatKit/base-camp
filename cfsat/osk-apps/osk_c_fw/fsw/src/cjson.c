@@ -280,8 +280,8 @@ static bool LoadObj(CJSON_Obj_t* Obj, const char* Buf, size_t BufLen, OBJ_Necess
    {
    
       CFE_EVS_SendEvent(CJSON_LOAD_OBJ_EID, CFE_EVS_EventType_DEBUG,
-                        "CJSON_LoadObj: Type=%s, Value=%s, Len=%ld",
-                        JsonTypeStr[ValueType], Value, ValueLen);
+                        "CJSON_LoadObj: Type=%s, Value=%s, Len=%d",
+                        JsonTypeStr[ValueType], Value, (unsigned int)ValueLen);
 
       switch (ValueType)
       {
@@ -303,8 +303,8 @@ static bool LoadObj(CJSON_Obj_t* Obj, const char* Buf, size_t BufLen, OBJ_Necess
             {
                
                CFE_EVS_SendEvent(CJSON_LOAD_OBJ_ERR_EID, CFE_EVS_EventType_ERROR, 
-                                 "JSON string length %ld exceeds %s's max length %ld", 
-                                 ValueLen, Obj->Query.Key, Obj->TblDataLen);
+                                 "JSON string length %d exceeds %s's max length %d", 
+                                 (unsigned int)ValueLen, Obj->Query.Key, (unsigned int)Obj->TblDataLen);
             
             }
             break;
@@ -332,7 +332,7 @@ static bool LoadObj(CJSON_Obj_t* Obj, const char* Buf, size_t BufLen, OBJ_Necess
          case JSONArray:
          
             CFE_EVS_SendEvent(CJSON_LOAD_OBJ_EID, CFE_EVS_EventType_INFORMATION,
-                              "JSON array %s, len = %ld", Value, ValueLen);
+                              "JSON array %s, len = %d", Value, (unsigned int)ValueLen);
             PrintJsonBuf(Value, ValueLen);
          
             break;
@@ -340,7 +340,7 @@ static bool LoadObj(CJSON_Obj_t* Obj, const char* Buf, size_t BufLen, OBJ_Necess
          case JSONObject:
          
             CFE_EVS_SendEvent(CJSON_LOAD_OBJ_EID, CFE_EVS_EventType_INFORMATION,
-                              "JSON array %s, len = %ld", Value, ValueLen);
+                              "JSON array %s, len = %d", Value, (unsigned int)ValueLen);
             PrintJsonBuf(Value, ValueLen);
          
             break;
@@ -506,8 +506,8 @@ static bool StubLoadJsonData(size_t JsonFileLen)
 {
    
    CFE_EVS_SendEvent(CJSON_INTERNAL_ERR_EID, CFE_EVS_EventType_CRITICAL, 
-      "StubLoadJsonData() called, JsonFileLen %ld. Code structural error that requires a developer",
-      JsonFileLen);
+      "StubLoadJsonData() called, JsonFileLen %d. Code structural error that requires a developer",
+      (unsigned int)JsonFileLen);
       
    return false;
 
@@ -526,8 +526,8 @@ static bool StubLoadJsonDataAlt(size_t JsonFileLen, void* UserDataPtr)
 {
    
    CFE_EVS_SendEvent(CJSON_INTERNAL_ERR_EID, CFE_EVS_EventType_CRITICAL, 
-      "StubLoadJsonDataAlt() called, JsonFileLen %ld, UserDataPtr 0x%p. Code structural error that requires a developer",
-      JsonFileLen, UserDataPtr);
+      "StubLoadJsonDataAlt() called, JsonFileLen %d, UserDataPtr 0x%p. Code structural error that requires a developer",
+      (unsigned int)JsonFileLen, UserDataPtr);
 
    return false;
 

@@ -238,8 +238,8 @@ static bool LoadJsonData(size_t JsonFileLen)
    {
 
       CFE_EVS_SendEvent(MSGLOGTBL_LOAD_ERR_EID, CFE_EVS_EventType_ERROR, 
-                        "Table has never been loaded and new table only contains %ld of %ld data objects",
-                        ObjLoadCnt, MsgLogTbl->JsonObjCnt);
+                        "Table has never been loaded and new table only contains %d of %d data objects",
+                        (unsigned int)ObjLoadCnt, (unsigned int)MsgLogTbl->JsonObjCnt);
    
    }
    else

@@ -36,7 +36,7 @@
 */
 
 #include "osk_c_fw_cfg.h"
-
+#include "cmdmgr.h"
 
 /***********************/
 /** Macro Definitions **/
@@ -111,7 +111,7 @@ typedef struct
 
 typedef struct
 {
-   CFE_MSG_CommandHeader_t    CmdHeader;
+   CMDMGR_AlignedCmdHeader_t  CmdHeader;
    TBLMGR_TblCmdMsg_Payload_t Payload;
 
 } TBLMGR_LoadTblCmdMsg_t;
@@ -119,7 +119,7 @@ typedef struct
 
 typedef struct
 {
-   CFE_MSG_CommandHeader_t  CmdHeader;
+   CFE_MSG_CommandHeader_t    CmdHeader;
    TBLMGR_TblCmdMsg_Payload_t Payload;
 
 } TBLMGR_DumpTblCmdMsg_t;
