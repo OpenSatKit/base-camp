@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 """
-    Copyright 2022 Open STEMware Foundation
+    Copyright 2022 bitValence, Inc.
     All Rights Reserved.
 
-    This program is free software; you can modify and/or redistribute it under
-    the terms of the GNU Affero General Public License as published by the Free
-    Software Foundation; version 3 with attribution addendums as found in the
-    LICENSE.txt
+    This program is free software; you can modify and/or redistribute it
+    under the terms of the GNU Affero General Public License
+    as published by the Free Software Foundation; version 3 with
+    attribution addendums as found in the LICENSE.txt.
 
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
-    details.
-
-    This program may also be used under the terms of a commercial or enterprise
-    edition license of cFSAT if purchased from the copyright holder.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
     Purpose:
         Provide JSON base class.
@@ -32,11 +29,10 @@ from datetime import datetime
 
 class JsonFile():
     """
-    Abstract base class for managing JSON files in a consistent manner. This
-    is designed for cfsat as opposed to general utility so it's up to the user
-    to protect against errors.
-    JSON key constants should all be used within the Json classes to
-    localize impacts due to JSON key changes.
+    Abstract base class to manage JSON files used to store state in a consistent
+    manner. This is designed for cfsat as opposed to general utility so it's up
+    to the user to protect against errors. JSON key constants should all be used
+    within the Json classes to localize impacts due to JSON key changes.
     """
     def __init__(self, json_file):
 

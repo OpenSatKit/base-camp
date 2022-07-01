@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 """
-    Copyright 2022 Open STEMware Foundation
+    Copyright 2022 bitValence, Inc.
     All Rights Reserved.
 
-    This program is free software; you can modify and/or redistribute it under
-    the terms of the GNU Affero General Public License as published by the Free
-    Software Foundation; version 3 with attribution addendums as found in the
-    LICENSE.txt
+    This program is free software; you can modify and/or redistribute it
+    under the terms of the GNU Affero General Public License
+    as published by the Free Software Foundation; version 3 with
+    attribution addendums as found in the LICENSE.txt.
 
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
-    details.
-
-    This program may also be used under the terms of a commercial or enterprise
-    edition license of cFSAT if purchased from the copyright holder.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
     Purpose:
         Provide the main application for the cFS Application Toolkit (cFSAT)
@@ -64,7 +61,8 @@ from cfsinterface import CmdTlmRouter
 from cfsinterface import Cfe, EdsMission
 from cfsinterface import TelecommandInterface, TelecommandScript
 from cfsinterface import TelemetryMessage, TelemetryObserver, TelemetryQueueServer
-from tools import CreateApp, ManageTutorials, crc_32c, datagram_to_str, compress_abs_path, TextEditor, AppStore
+from tools import CreateApp, ManageTutorials, crc_32c, datagram_to_str, compress_abs_path, TextEditor
+from tools import AppStore, ManageUsrApps, AppSpec, PiControl
 
 
 ###############################################################################
@@ -359,28 +357,34 @@ class TelecommandGui(TelecommandInterface):
 
                     cmd_has_payload, cmd_payload_item = self.get_cmd_entry_payload(cmd_entry)
                     logger.debug("cmd_payload_item = " + str(cmd_payload_item))
-            
+                    
+                    send_command = True
                     if cmd_has_payload:
             
-                        # Use the information from the database entry iterator to get a payload Entry and object
-                        logger.debug("cmd_payload_item[1] = " + str(cmd_payload_item[1]))
-                        logger.debug("cmd_payload_item[2] = " + str(cmd_payload_item[2]))
-                        #todo: payload_entry = self.eds_mission.lib_db.DatabaseEntry(cmd_payload_item[1], cmd_payload_item[2])
-                        payload_entry = self.eds_mission.get_database_named_entry(cmd_payload_item[2])
-                        payload = payload_entry()
-                        logger.debug("payload_entry = " + str(payload_entry))
-                        logger.debug("payload = " + str(payload))
+                        try:
+                            # Use the information from the database entry iterator to get a payload Entry and object
+                            logger.debug("cmd_payload_item[1] = " + str(cmd_payload_item[1]))
+                            logger.debug("cmd_payload_item[2] = " + str(cmd_payload_item[2]))
+                            #todo: payload_entry = self.eds_mission.lib_db.DatabaseEntry(cmd_payload_item[1], cmd_payload_item[2])
+                            payload_entry = self.eds_mission.get_database_named_entry(cmd_payload_item[2])
+                            payload = payload_entry()
+                            logger.debug("payload_entry = " + str(payload_entry))
+                            logger.debug("payload = " + str(payload))
 
-                        #payload = EdsLib.DatabaseEntry('samplemission','FILE_MGR/SendDirListTlm_Payload')({'DirName': '', 'DirListOffset': 0, 'IncludeSizeTime': 'FALSE'})
-                        #todo: Check if None? payload_struct = self.get_payload_struct(payload_entry, payload, 'Payload')
-                        eds_payload = self.set_payload_values(self.payload_struct)
-                        payload = payload_entry(eds_payload)
-
-                        cmd_obj['Payload'] = payload
+                            #payload = EdsLib.DatabaseEntry('samplemission','FILE_MGR/SendDirListTlm_Payload')({'DirName': '', 'DirListOffset': 0, 'IncludeSizeTime': 'FALSE'})
+                            #todo: Check if None? payload_struct = self.get_payload_struct(payload_entry, payload, 'Payload')
+                            eds_payload = self.set_payload_values(self.payload_struct)
+                            payload = payload_entry(eds_payload)                   
+                            cmd_obj['Payload'] = payload
     
-                    (cmd_sent, cmd_text, cmd_status) = self.send_command(cmd_obj)
-                    if cmd_sent:
-                        cmd_status = "%s %s command sent" % (topic_name, cmd_name)
+                        except:
+                           send_command = False
+                           cmd_status = "%s %s command not sent. Error loading parameters from command window " % (topic_name, cmd_name)
+                    
+                    if send_command:
+                        (cmd_sent, cmd_text, cmd_status) = self.send_command(cmd_obj)
+                        if cmd_sent:
+                            cmd_status = "%s %s command sent" % (topic_name, cmd_name)
                     
                 else:    
             
@@ -585,7 +589,7 @@ class CfsatTelemetryMonitor(TelemetryObserver):
         self.tlm_callback = tlm_callback
         self.event_queue  = event_queue
         
-        self.sys_apps = ['CFE_ES', 'CFE_EVS', 'CFE_SB', 'CFE_TBL', 'CFE_TIME', 'OSK_C_DEMO' 'FILE_MGR']
+        self.sys_apps = ['CFE_ES', 'CFE_EVS', 'CFE_SB', 'CFE_TBL', 'CFE_TIME', 'OSK_C_DEMO' 'FILE_MGR' 'FILE_XFER']
         
         for msg in self.tlm_server.tlm_messages:
             tlm_msg = self.tlm_server.tlm_messages[msg]
@@ -625,44 +629,87 @@ class CfsatTelemetryMonitor(TelemetryObserver):
 class ManageCfs():
     """
     Manage the display for building and running the cFS.
+    app_abs_path - Is the python application, not cFS apps
     """
-    def __init__(self, app_abs_path, cfs_abs_base_path, main_window):
-        self.app_abs_path      = app_abs_path
+    def __init__(self, cfsat_abs_path, cfs_abs_base_path, usr_app_rel_path, main_window):
+        self.cfsat_abs_path    = cfsat_abs_path
         self.cfs_abs_base_path = cfs_abs_base_path
         self.cfs_abs_defs_path = os.path.join(self.cfs_abs_base_path, "cfsat_defs")     #TODO - Use constants
-        self.cfsat_tools_path  = os.path.join(app_abs_path, "tools")
+        self.cfsat_tools_path  = os.path.join(cfsat_abs_path, "tools")
+        self.usr_app_path      = compress_abs_path(os.path.join(cfsat_abs_path, usr_app_rel_path))
         self.main_window       = main_window
         self.build_subprocess  = None
-    
-    def gui(self):
-        b_size  = (1,1)
-        b_pad   = ((0,2),(2,2))
-        b_font  = ('Arial bold', 11)
-        b_color = 'black on LightSkyBlue3'
-        t_font  = ('Arial', 14)
+        self.selected_app      = None
+        
+        self.b_size  = (2,1)
+        self.b_pad   = ((0,2),(2,2))
+        self.b_font  = ('Arial bold', 11)
+        self.b_color = 'black on LightSkyBlue3'
+        self.t_font  = ('Arial', 14)
+
+    def select_app_gui(self, app_name_list):
+        """
+        Select an app to be integrated
+        """
+        self.selected_app = None
+        
         layout = [
-                  [sg.Button('1', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-1-'),
-                   sg.Text('Stop the cFS prior to modifying or adding an app', font=t_font)],   
-                  [sg.Button('2', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-2-'),
-                   sg.Text('Edit targets.cmake', font=t_font)],
-                  [sg.Button('3', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-3-'),
-                   sg.Text('Edit cpu1_cfe_es_startup.scr', font=t_font)],
-                  [sg.Button('4', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-4-'),
-                   sg.Text('Edit EDS cfe-topicids.xml', font=t_font)],
-                  [sg.Button('5', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-5-'),
-                   sg.Text('Edit EDS config.xml', font=t_font)],
-                  [sg.Button('6', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-6-'),
-                   sg.Text('Edit scheduler table', font=t_font)],
-                  [sg.Button('7', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-7-'),
-                   sg.Text('Edit telemetry output', font=t_font)],
-                  [sg.Button('8', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-8-'),
-                   sg.Text('Build the cfS', font=t_font)],
-                  [sg.Button('9', size=b_size, button_color=b_color, font=b_font, pad=b_pad, enable_events=True, key='-9-'),
-                   sg.Text('Reload cFS EDS definitions', font=t_font)],
+                  [sg.Text('Select an app from the dropdown iist and click Submit\n', font=self.b_font)],
+                  [sg.Combo(app_name_list, pad=self.b_pad, font=self.b_font, enable_events=True, key="-USR_APP-", default_value=app_name_list[0]),
+                   sg.Button('Submit', button_color=('white', '#007339'), pad=self.b_pad, key='-SUBMIT-'),
+                   sg.Button('Cancel', button_color=('white', 'firebrick4'), pad=self.b_pad, key='-CANCEL-')]
+                 ]      
+
+        window = sg.Window('Select App to Integrate', layout, resizable=True, modal=True)
+        
+        while True:
+        
+            event, values = window.read()
+        
+            if event in (sg.WIN_CLOSED, '-CANCEL-') or event is None:
+                break
+                
+            elif event == '-SUBMIT-':
+                self.selected_app = values['-USR_APP-']
+                break
+        
+        window.close()       
+              
+    
+    def integrate_app_gui(self, usr_app_spec):
+        """
+        Provide steps for the user to integrate an app. This is only invoked
+        after an app has been selected.
+        The steps have some degree of independence in case the user doesn't do
+        things in order which means some processing may be repeated. For example
+        the table files are recomputed for the edit targets.cmake step and the
+        copy files to cfsat_defs steps. 
+        """
+        layout = [
+                  [sg.Button('1', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-1-'),
+                   sg.Text('Stop the cFS prior to modifying or adding an app', font=self.t_font)],   
+                  [sg.Button('2', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-2-'),
+                   sg.Text('Update targets.cmake', font=self.t_font)],
+                  [sg.Button('3', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-3-'),
+                   sg.Text('Copy table files to cfsat_defs', font=self.t_font)],
+                  [sg.Button('4', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-4-'),
+                   sg.Text('Update cpu1_cfe_es_startup.scr', font=self.t_font)],
+                  [sg.Button('5', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-5-'),
+                   sg.Text('Update EDS cfe-topicids.xml', font=self.t_font)],
+                  [sg.Button('6', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-6-'),
+                   sg.Text('Update EDS config.xml', font=self.t_font)],
+                  [sg.Button('7', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-7-'),
+                   sg.Text('Update scheduler app table', font=self.t_font)],
+                  [sg.Button('8', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-8-'),
+                   sg.Text('Update telemetry output app table', font=self.t_font)],
+                  [sg.Button('9', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-9-'),
+                   sg.Text('Build the cfS', font=self.t_font)],
+                  [sg.Button('10', size=self.b_size, button_color=self.b_color, font=self.b_font, pad=self.b_pad, enable_events=True, key='-10-'),
+                   sg.Text('Reload cFS python EDS definitions', font=self.t_font)],
                   [sg.Button('Exit', enable_events=True, key='-EXIT-', image_data=image_grey1, button_color=('black', sg.theme_background_color()), border_width=0)]
                  ]
         # sg.Button('Exit', enable_events=True, key='-EXIT-')
-        self.window = sg.Window('Build & Run the cFS', layout, resizable=True, modal=True)
+        self.window = sg.Window('Integrate %s with the cFS' % usr_app_spec.app_name, layout, resizable=True, modal=True)
         
         while True:
         
@@ -674,46 +721,74 @@ class ManageCfs():
             elif self.event == '-1-': # Stop the cFS prior to modifying or adding an app
                 subprocess.Popen('./stop_cfs.sh', shell=True)
             
-            elif self.event == '-2-': # Edit targets.cmake
+            elif self.event == '-2-': # Update targets.cmake
+                cmake_files = usr_app_spec.get_targets_cmake_files()
+                popup_text = "After this dialogue, targets.cmake will open in an editor.\nMake the following changes:\n\n1. Add '%s' to 'cpu1_APPLIST'\n" % cmake_files['obj-file']
+                table_list = ""
+                for table in cmake_files['tables']:
+                    table_list += "%s, " % table
+                if len(table_list) > 0:
+                    popup_text += "2. Add '%s' to 'cpu1_FILELIST'\n" % table_list[:len(table_list)-2]
+                sg.popup(popup_text, title='Update targets.cmake', grab_anywhere=True, modal=True)
                 path_filename = os.path.join(self.cfs_abs_defs_path, 'targets.cmake')
                 self.text_editor = sg.execute_py_file("texteditor.py", parms=path_filename, cwd=self.cfsat_tools_path)
             
-            elif self.event == '-3-': # Edit cpu1_cfe_es_startup.scr
+            elif self.event == '-3-': # Copy table files to cfsat_defs
+                cmake_files = usr_app_spec.get_targets_cmake_files()
+                popup_text = "This app does not have any table files to copy"
+                table_list = ""
+                for table in cmake_files['tables']:
+                    table_list += "%s, " % table
+                if len(table_list) > 0:
+                    app_table_path = os.path.join(self.usr_app_path, 'fsw', 'tables')
+                    popup_text = "Copy table files '%s'\n\nFROM %s\n\nTO %s\n" % (table_list[:len(table_list)-2], app_table_path, self.cfs_abs_defs_path)
+                sg.popup(popup_text, title='Copy table files', grab_anywhere=True, modal=True)
+            
+            elif self.event == '-4-': # Update cpu1_cfe_es_startup.scr
+                startup_script_entry = usr_app_spec.get_startup_scr_entry()
+                popup_text = "After this dialogue, cpu1_cfe_es_startup.scr will open in an editor.\nAdd the following entry:\n\n'%s'\n" % startup_script_entry
+                sg.popup(popup_text, title='Update cpu1_cfe_es_startup.scr', grab_anywhere=True, modal=True)
                 path_filename = os.path.join(self.cfs_abs_defs_path, 'cpu1_cfe_es_startup.scr')
                 self.text_editor = sg.execute_py_file("texteditor.py", parms=path_filename, cwd=self.cfsat_tools_path)
             
-            elif self.event == '-4-': # Edit EDS cfe-topicids.xml
-                path_filename = os.path.join(self.cfs_abs_base_path, 'eds/cfe-topicids.xml')
+            elif self.event == '-5-': # Update EDS cfe-topicids.xml
+                path_filename = os.path.join(self.cfs_abs_base_path, 'cfsat_defs', 'eds', 'cfe-topicids.xml')
                 self.text_editor = sg.execute_py_file("texteditor.py", parms=path_filename, cwd=self.cfsat_tools_path)
             
-            elif self.event == '-5-': # Edit EDS config.xml
-                path_filename = os.path.join(self.cfs_abs_base_path, 'eds/config.xml')
+            elif self.event == '-6-': # Update EDS config.xml
+                path_filename = os.path.join(self.cfs_abs_base_path, 'cfsat_defs', 'eds', 'config.xml')
                 self.text_editor = sg.execute_py_file("texteditor.py", parms=path_filename, cwd=self.cfsat_tools_path)
 
-            elif self.event == '-6-': # Edit scheduler table
+            elif self.event == '-7-': # Update scheduler app table
                 path_filename = os.path.join(self.cfs_abs_base_path, 'apps/sch_lab/fsw/tables/sch_lab_table.c')
                 self.text_editor = sg.execute_py_file("texteditor.py", parms=path_filename, cwd=self.cfsat_tools_path)
             
-            elif self.event == '-7-': # Edit telemetry output
+            elif self.event == '-8-': # Update telemetry output app table
                 path_filename = os.path.join(self.cfs_abs_base_path, 'apps/to_lab/fsw/tables/to_lab_sub.c')
                 self.text_editor = sg.execute_py_file("texteditor.py", parms=path_filename, cwd=self.cfsat_tools_path)
             
-            elif self.event == '-8-': # Build the cfS
-                build_cfs_sh = os.path.join(self.app_abs_path, 'build_cfs.sh')
+            elif self.event == '-9-': # Build the cfS
+                build_cfs_sh = os.path.join(self.cfsat_abs_path, 'build_cfs.sh')
                 self.build_subprocess = subprocess.Popen('%s %s' % (build_cfs_sh, self.cfs_abs_base_path),
                                                        stdout=subprocess.PIPE, shell=True, bufsize=1, universal_newlines=True)
                 if self.build_subprocess is not None:
                     self.cfs_stdout = CfsStdout(self.build_subprocess, self.main_window)
                     self.cfs_stdout.start()
                 
-            elif self.event == '-9-': # Reload cFS EDS definitions
-                sg.popup('Reload cFS EDS definitions', title='Coming soon...', grab_anywhere=True, modal=True)
+            elif self.event == '-10-': # Reload cFS python EDS definitions
+                sg.popup('This feature has not been implemented. You must restart cfsat.', title='Reload cFS EDS definitions', grab_anywhere=True, modal=True)
 
         self.window.close()       
 
     def execute(self):
-        self.gui()
-        
+        self.manage_usr_apps = ManageUsrApps(self.usr_app_path)
+        self.cfs_app_specs = self.manage_usr_apps.get_app_specs()
+        if len(self.cfs_app_specs) > 0:
+            self.select_app_gui(list(self.cfs_app_specs.keys()))
+            if self.selected_app is not None:
+                self.integrate_app_gui(self.manage_usr_apps.get_app_spec(self.selected_app))
+        else:
+            sg.popup('Your usr/apps directory is empty', title='Error', grab_anywhere=True, modal=True)
 
   
 class CfsStdout(threading.Thread):
@@ -830,6 +905,7 @@ class App():
         self.file_browser  = None
         self.script_runner = None
         self.tutorial      = None
+        self.pisat_control = None
 
     def update_event_history_str(self, new_event_text):
         time = datetime.now().strftime("%H:%M:%S")
@@ -897,8 +973,8 @@ class App():
     
         menu_def = [
                        ['System', ['Options', 'About', 'Exit']],
-                       ['Developer', ['Create App', 'Download App','Add App to cFS', 'Certify App', 'Run Perf Monitor']],
-                       ['Operator', ['Script Runner', 'File Browser', 'Manage Tables']],
+                       ['Developer', ['Create App', 'Download App','Add App to cFS', 'Run Perf Monitor']], #todo: 'Certify App' 
+                       ['Operator', ['Browse Files', 'Run Script', 'Manage Tables', '---', 'Control PiSat']],
                        ['Documents', ['cFS Overview', 'cFE Overview', 'OSK App Dev']],
                        ['Tutorials', self.manage_tutorials.tutorial_titles]
                    ]
@@ -1050,9 +1126,9 @@ class App():
             elif self.event == 'Download App':
                 app_store = AppStore(self.config.get('APP','APP_STORE_URL'), self.config.get('PATHS','USR_APP_PATH'))
                 app_store.execute()
-
+ 
             elif self.event == 'Add App to cFS':
-                manage_cfs = ManageCfs(self.path, self.cfs_abs_base_path, self.window)
+                manage_cfs = ManageCfs(self.path, self.cfs_abs_base_path, self.config.get('PATHS', 'USR_APP_PATH'), self.window)
                 manage_cfs.execute()
 
             if self.event == 'Certify App':
@@ -1067,14 +1143,14 @@ class App():
             elif self.event == '-ENA_TLM-':
                 self.enable_telemetry()
 
-            elif self.event == 'Script Runner':
+            elif self.event == 'Run Script':
                 self.cmd_tlm_router.add_cmd_source(self.config.getint('NETWORK','SCRIPT_RUNNER_CMD_PORT'))
                 self.cmd_tlm_router.add_tlm_dest(self.config.getint('NETWORK','SCRIPT_RUNNER_TLM_PORT'))
                 cfs_interface_dir = os.path.join(self.path, "cfsinterface")
                 print("cfs_interface_dir = " + cfs_interface_dir)
                 self.script_runner = sg.execute_py_file("scriptrunner.py", cwd=cfs_interface_dir)
 
-            elif self.event == 'File Browser' or self.event == '-FILE_BROWSER-':
+            elif self.event == 'Browse Files' or self.event == '-FILE_BROWSER-':
                 self.cmd_tlm_router.add_cmd_source(self.config.getint('NETWORK','FILE_BROWSER_CMD_PORT'))
                 self.cmd_tlm_router.add_tlm_dest(self.config.getint('NETWORK','FILE_BROWSER_TLM_PORT'))
                 cfs_interface_dir = os.path.join(self.path, "cfsinterface")
@@ -1083,6 +1159,11 @@ class App():
 
             elif self.event == 'Manage Tables':
                 self.ComingSoonPopup("Manage cFS app JSON tables")
+
+            elif self.event == 'Control PiSat':
+                tools_dir = os.path.join(self.path, "tools")
+                print("tools_dir = " + tools_dir)
+                self.pisat_control = sg.execute_py_file("picontrol.py", cwd=tools_dir)
 
 
             ### DOCUMENTS ###
@@ -1180,12 +1261,12 @@ class App():
                     time.sleep(1)
                     """
                                     
-                if self.cfs_subprocess.poll() is not None:
-                    logger.info("Killing cFS after subprocess poll")
-                    if self.cfs_stdout is not None:
-                        self.cfs_stdout.terminate()  # I tried to join() afterwards and it hangs
-                    subprocess.Popen('./stop_cfs.sh', shell=True)
-                    sg.popup("cFS failed to terminate.\nUse another terminal to kill the process.", title='Warning', grab_anywhere=True, modal=False)
+                    if self.cfs_subprocess.poll() is not None:
+                        logger.info("Killing cFS after subprocess poll")
+                        if self.cfs_stdout is not None:
+                            self.cfs_stdout.terminate()  # I tried to join() afterwards and it hangs
+                        subprocess.Popen('./stop_cfs.sh', shell=True)
+                        sg.popup("cFS failed to terminate.\nUse another terminal to kill the process.", title='Warning', grab_anywhere=True, modal=False)
                 else:
                     self.window["-CFS_IMAGE-"].update(self.GUI_NO_IMAGE_TXT)
                     self.window["-CFS_TIME-"].update(self.GUI_NULL_TXT)
