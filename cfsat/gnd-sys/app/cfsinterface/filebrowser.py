@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 """
-    Copyright 2022 Open STEMware Foundation
+    Copyright 2022 bitValence, Inc.
     All Rights Reserved.
 
-    This program is free software; you can modify and/or redistribute it under
-    the terms of the GNU Affero General Public License as published by the Free
-    Software Foundation; version 3 with attribution addendums as found in the
-    LICENSE.txt
+    This program is free software; you can modify and/or redistribute it
+    under the terms of the GNU Affero General Public License
+    as published by the Free Software Foundation; version 3 with
+    attribution addendums as found in the LICENSE.txt.
 
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
-    details.
-
-    This program may also be used under the terms of a commercial or enterprise
-    edition license of cFSAT if purchased from the copyright holder.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
     Purpose:
         Provide classes that manage ground and flight files through a GUI. This
@@ -340,14 +337,14 @@ class FileBrowser(CmdTlmProcess):
         pri_hdr_font   = ('Arial bold',14)
         list_font      = ('Arial',12)
         log_font       = ('Courier',11)
-        self.gnd_file_menu = ['_', ['Send to Flight', 'Edit File', '---',  'Rename File', 'Delete File']] #TODO - Decide on dir support 
+        self.gnd_file_menu = ['_', ['Refresh', '---', 'Send to Flight', 'Edit File', '---',  'Rename File', 'Delete File']] #TODO - Decide on dir support 
         self.gnd_col = [
             [sg.Text('Ground', font=col_title_font)],
             [sg.Text('Folder'), sg.In(self.default_gnd_path, size=(25,1), enable_events=True ,key='-GND_FOLDER-'), sg.FolderBrowse(initial_folder=self.default_gnd_path)],
             [sg.Listbox(values=[], font=list_font, enable_events=True, size=(40,20), key='-GND_FILE_LIST-', right_click_menu=self.gnd_file_menu)]]
         
-        # Duplicate ground names have a space. A little kludgy but it works
-        self.flt_file_menu = ['_', [ 'List Dir', 'Send to Ground', 'Cancel Send', '---',  'Create Dir', 'Delete Dir', '---', 'Rename File ', 'Delete File ']] # Use space to differentiate from ground 
+        # Duplicate ground names have a trailing space to differentiate them. A little kludgy but it works
+        self.flt_file_menu = ['_', [ 'Refresh ', '---', 'List Dir', 'Send to Ground', 'Cancel Send', '---',  'Create Dir', 'Delete Dir', '---', 'Rename File ', 'Delete File ']] 
         self.flt_col = [
             [sg.Text('Flight', font=col_title_font)],
             [sg.Text('Folder'), sg.In(self.default_flt_path, size=(25,1), enable_events=True ,key='-FLT_FOLDER-'),
@@ -419,7 +416,10 @@ class FileBrowser(CmdTlmProcess):
             ### Ground ###
                 
             elif self.event == '-GND_FOLDER-':                         
-                self.gnd_dir.create_file_list(self.values['-GND_FOLDER-'])                
+                self.gnd_dir.create_file_list(self.values['-GND_FOLDER-'])
+
+            elif self.event == 'Refresh':                         
+                self.gnd_dir.create_file_list()
 
             elif self.event == 'Edit File':
                 """
@@ -457,6 +457,9 @@ class FileBrowser(CmdTlmProcess):
             elif self.event == '-FLT_UP-':
                 self.flt_dir.move_up()
                 self.window['-FLT_FOLDER-'].update(self.flt_dir.path)
+
+            elif self.event == 'Refresh ':                         
+                self.flt_dir.create_file_list()
 
             elif self.event == 'List Dir':
                 if len(self.values['-FLT_FILE_LIST-']) > 0:

@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 """
-    Copyright 2022 Open STEMware Foundation
+    Copyright 2022 bitValence, Inc.
     All Rights Reserved.
 
-    This program is free software; you can modify and/or redistribute it under
-    the terms of the GNU Affero General Public License as published by the Free
-    Software Foundation; version 3 with attribution addendums as found in the
-    LICENSE.txt
+    This program is free software; you can modify and/or redistribute it
+    under the terms of the GNU Affero General Public License
+    as published by the Free Software Foundation; version 3 with
+    attribution addendums as found in the LICENSE.txt.
 
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
-    details.
-
-    This program may also be used under the terms of a commercial or enterprise
-    edition license of cFSAT if purchased from the copyright holder.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
     Purpose:
         Provide classes to manage tutorials and lessons within a tutorial.
@@ -279,10 +276,11 @@ class Tutorial():
 
 class ManageTutorials():
     """
-    Manage the display for a tutorial. A tutorial folder conatins a
-    tutorial.json that describes the tutorial and a lesson folder that 
-    contains numbered lesson folders. Each lesson folder contains a 
-    lesson.json file.  
+    Discover what tutorials exists (each tutorial in separate directory) and
+    create a 'database' of information about the tutorials based on each 
+    tutorial's JSON spec.
+    User select tutorials based by title so self.tutorial_lookup provides a
+    method to retreive a tutorial given its title
     """
     def __init__(self, tutorials_path):
 
@@ -307,6 +305,7 @@ class ManageTutorials():
     def run_tutorial(self, tutorial_title):
         if tutorial_title in self.tutorial_titles:
             self.tutorial_lookup[tutorial_title].execute()
+
 
 ###############################################################################
 
